@@ -3,7 +3,12 @@ name = "gisflu"
 version = "0.1.1"
 description = "Access the GISAID Flu database using Python"
 authors = [{ name = "william", email = "william_swl@163.com" }]
-dependencies = ["httpx>=0.27.0", "python-dotenv>=1.0.1", "pandas>=2.0.3"]
+dependencies = [
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.1",
+    "pandas>=2.0.3",
+    "tqdm>=4.66.4",
+]
 requires-python = ">=3.8"
 readme = "README.md"
 

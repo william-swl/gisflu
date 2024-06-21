@@ -64,7 +64,7 @@ def login(username=None, password=None, timeout=15):
 
     res = client.post(cred.url, data=body, headers=cred.headers, follow_redirects=True)
     assert re.search("cms_page", res.text), "Username or password wrong!"
-    logger.debug(f"{username} logged!")
+    logger.debug("username and password validated!")
 
     # first page after login
     logger.debug("Go to first page...")
@@ -182,5 +182,6 @@ def login(username=None, password=None, timeout=15):
         cred.resultHeaderDict[key] = label
 
     backToBrowsePage(cred)
+    logger.debug(f"{username} logged!")
 
     return cred

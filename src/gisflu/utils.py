@@ -105,8 +105,6 @@ def backToBrowsePage(credentials):
     browsePagePid = credentials.browsePage["pid"]
     client.get(f"{credentials.url}?sid={credentials.sessionId}&pid={browsePagePid}")
 
-    logger.debug("Back to browse page")
-
     return None
 
 
