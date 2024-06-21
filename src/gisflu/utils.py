@@ -2,6 +2,7 @@ import logging
 import httpx
 import json
 import time
+import stamina
 
 client = httpx.Client(timeout=10)
 logger = logging.getLogger(__name__)
@@ -81,6 +82,21 @@ def buildBatch(startIdx, endIdx, batchSize):
         count = end - start + 1
         res.append({"start": start, "end": end, "count": count})
 
+    return res
+
+
+################## requests ####################
+
+
+@stamina.retry(on=httpx.HTTPError, attempts=3)
+def httpGet(url):
+    res = client.get(url, follow_redirects=True)
+    return res
+
+
+@stamina.retry(on=httpx.HTTPError, attempts=3)
+def httpPost(url, data, headers):
+    res = client.post(url, data=data, headers=headers, follow_redirects=True)
     return res
 
 

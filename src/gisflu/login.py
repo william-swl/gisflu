@@ -1,9 +1,8 @@
 import os
 import hashlib
 import re
-import httpx
 from .credentials import credentials
-from .utils import buildCommand, buildRequestBody, backToBrowsePage
+from .utils import buildCommand, buildRequestBody, backToBrowsePage, httpGet, httpPost
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,8 +10,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.NullHandler())
 
 
-def login(username=None, password=None, timeout=15):
-    client = httpx.Client(timeout=timeout)
+def login(username=None, password=None):
     cred = credentials()
 
     # get username and password
@@ -34,12 +32,12 @@ def login(username=None, password=None, timeout=15):
     password_md5 = hashlib.md5(password.encode()).hexdigest()
 
     # fetch sessionId first
-    res = client.get(cred.url, follow_redirects=True)
+    res = httpGet(cred.url)
     cred.sessionId = re.search(r'name="sid" value=\'(.+?)\'', res.text).group(1)
     logger.debug(f"Get sessionId: {cred.sessionId}")
 
     # then get login page, to get more ids
-    res = client.get(f"{cred.url}?sid={cred.sessionId}", follow_redirects=True)
+    res = httpGet(f"{cred.url}?sid={cred.sessionId}")
     loginPageText = res.text
     cred.windowId = re.search(r'sys\["WID"\] = "(.+?)";', loginPageText).group(1)
     cred.loginPage["pid"] = re.search(r'sys\["PID"\] = "(.+?)";', loginPageText).group(
@@ -62,13 +60,13 @@ def login(username=None, password=None, timeout=15):
         cred.sessionId, cred.windowId, cred.loginPage["pid"], cmdPipe, mode="ajax"
     )
 
-    res = client.post(cred.url, data=body, headers=cred.headers, follow_redirects=True)
+    res = httpPost(cred.url, data=body, headers=cred.headers)
     assert re.search("cms_page", res.text), "Username or password wrong!"
     logger.debug("username and password validated!")
 
     # first page after login
     logger.debug("Go to first page...")
-    res = client.get(f"{cred.url}?sid={cred.sessionId}", follow_redirects=True)
+    res = httpGet(f"{cred.url}?sid={cred.sessionId}")
     firstPageText = res.text
     cred.firstPage["pid"] = re.search(r'sys\["PID"\] = "(.+?)";', firstPageText).group(
         1
@@ -89,12 +87,12 @@ def login(username=None, password=None, timeout=15):
         cred.sessionId, cred.windowId, cred.firstPage["pid"], cmdPipe
     )
 
-    res = client.post(cred.url, data=body, headers=cred.headers, follow_redirects=True)
+    res = httpPost(cred.url, data=body, headers=cred.headers)
     homePagePid = re.search(r"sys.goPage\(\'(.+?)\'\)", res.text).group(1)
     cred.homePage["pid"] = homePagePid
 
     # go to flu home page
-    res = client.get(f"{cred.url}?sid={cred.sessionId}&pid={homePagePid}")
+    res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={homePagePid}")
     homePageText = res.text
 
     ################## browse page ####################
@@ -112,13 +110,13 @@ def login(username=None, password=None, timeout=15):
         cred.sessionId, cred.windowId, cred.homePage["pid"], cmdPipe
     )
 
-    res = client.post(cred.url, data=body, headers=cred.headers, follow_redirects=True)
+    res = httpPost(cred.url, data=body, headers=cred.headers)
 
     browsePagePid = re.search(r"sys.goPage\(\'(.+?)\'\)", res.text).group(1)
     cred.browsePage["pid"] = browsePagePid
 
     # go to browse page
-    res = client.get(f"{cred.url}?sid={cred.sessionId}&pid={browsePagePid}")
+    res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={browsePagePid}")
     browsePageText = res.text
 
     cred.browsePage["browseFormCompId"] = re.search(
@@ -157,12 +155,12 @@ def login(username=None, password=None, timeout=15):
     body = buildRequestBody(
         cred.sessionId, cred.windowId, cred.browsePage["pid"], cmdPipe
     )
-    res = client.post(cred.url, data=body, headers=cred.headers, follow_redirects=True)
+    res = httpPost(cred.url, data=body, headers=cred.headers)
     resultPagePid = re.search(r"sys.goPage\(\'(.+?)\'\)", res.text).group(1)
     cred.resultPage["pid"] = resultPagePid
 
     # go to result page
-    res = client.get(f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}")
+    res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}")
     resultPageText = res.text
     cred.resultPage["resultCompId"] = re.search(
         r"sys\.createComponent\(\'(c_\w+?)\',\'IsolateResultListComponent\'",

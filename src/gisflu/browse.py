@@ -1,4 +1,3 @@
-import httpx
 import re
 from .utils import (
     buildCommand,
@@ -6,6 +5,8 @@ from .utils import (
     buildBrowseCommand,
     buildBatch,
     backToBrowsePage,
+    httpGet,
+    httpPost,
 )
 from tqdm import tqdm
 import pandas as pd
@@ -25,10 +26,7 @@ def search(
     collectDateFrom=None,
     collectDateTo=None,
     recordLimit=50,
-    timeout=15,
 ):
-    client = httpx.Client(timeout=timeout)
-
     # search by command pipeline
     cmdPipe = []
     if type:
@@ -48,7 +46,7 @@ def search(
         cred.sessionId, cred.windowId, cred.browsePage["pid"], cmdPipe
     )
 
-    res = client.post(cred.url, data=body, headers=cred.headers, follow_redirects=True)
+    res = httpPost(cred.url, data=body, headers=cred.headers)
 
     # records count in the browse page
     preResultText = res.text
@@ -67,13 +65,13 @@ def search(
     body = buildRequestBody(
         cred.sessionId, cred.windowId, cred.browsePage["pid"], cmdPipe
     )
-    res = client.post(cred.url, data=body, headers=cred.headers, follow_redirects=True)
+    res = httpPost(cred.url, data=body, headers=cred.headers)
     resultPagePid = re.search(r"sys.goPage\(\'(.+?)\'\)", res.text).group(1)
     cred.resultPage["pid"] = resultPagePid
 
     logger.debug("Parse result page...")
     # go to result page
-    res = client.get(f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}")
+    res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}")
     resultPageText = res.text
     cred.resultPage["resultCompId"] = re.search(
         r"sys\.createComponent\(\'(c_\w+?)\',\'IsolateResultListComponent\'",
@@ -102,9 +100,7 @@ def search(
             body = buildRequestBody(
                 cred.sessionId, cred.windowId, cred.resultPage["pid"], cmdPipe
             )
-            res = client.post(
-                cred.url, data=body, headers=cred.headers, follow_redirects=True
-            )
+            res = httpPost(cred.url, data=body, headers=cred.headers)
 
             resultJson += res.json()["records"]
 
