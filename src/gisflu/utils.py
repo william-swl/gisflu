@@ -1,8 +1,12 @@
+import logging
 import httpx
 import json
 import time
 
 client = httpx.Client(timeout=10)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.NullHandler())
 
 
 def buildCommand(CompId, cmd, params={}, equiv=None):
@@ -93,11 +97,28 @@ def backToBrowsePage(credentials):
         credentials.resultPage["pid"],
         cmdPipe,
     )
+
     client.post(
         credentials.url, data=body, headers=credentials.headers, follow_redirects=True
     )
 
     browsePagePid = credentials.browsePage["pid"]
     client.get(f"{credentials.url}?sid={credentials.sessionId}&pid={browsePagePid}")
+
+    logger.debug("Back to browse page")
+
+    return None
+
+
+################## logger ####################
+def log(level=logging.DEBUG):
+    logger = logging.getLogger(__package__)
+    handler = logging.StreamHandler()
+    handler.setLevel(level)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     return None

@@ -4,6 +4,11 @@ import re
 import httpx
 from .credentials import credentials
 from .utils import buildCommand, buildRequestBody, backToBrowsePage
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.NullHandler())
 
 
 def login(username=None, password=None, timeout=15):
@@ -12,6 +17,10 @@ def login(username=None, password=None, timeout=15):
 
     # get username and password
     if username is None or password is None:
+        logger.debug(
+            "Username and password not provided, fetching from environment variables"
+        )
+
         username = os.getenv("GISAID_USERNAME")
         password = os.getenv("GISAID_PASSWORD")
 
@@ -27,6 +36,7 @@ def login(username=None, password=None, timeout=15):
     # fetch sessionId first
     res = client.get(cred.url, follow_redirects=True)
     cred.sessionId = re.search(r'name="sid" value=\'(.+?)\'', res.text).group(1)
+    logger.debug(f"Get sessionId: {cred.sessionId}")
 
     # then get login page, to get more ids
     res = client.get(f"{cred.url}?sid={cred.sessionId}", follow_redirects=True)
@@ -53,8 +63,11 @@ def login(username=None, password=None, timeout=15):
     )
 
     res = client.post(cred.url, data=body, headers=cred.headers, follow_redirects=True)
+    assert re.search("cms_page", res.text), "Username or password wrong!"
+    logger.debug(f"{username} logged!")
 
     # first page after login
+    logger.debug("Go to first page...")
     res = client.get(f"{cred.url}?sid={cred.sessionId}", follow_redirects=True)
     firstPageText = res.text
     cred.firstPage["pid"] = re.search(r'sys\["PID"\] = "(.+?)";', firstPageText).group(
@@ -65,6 +78,7 @@ def login(username=None, password=None, timeout=15):
     ).group(1)
 
     # fetch flu home page id by command pipeline
+    logger.debug("Go to flu homepage...")
     cmdPipe = [
         buildCommand(
             CompId=cred.firstPage["dbSwitchCompId"], cmd="Go", params={"page": "epi3"}
@@ -84,6 +98,7 @@ def login(username=None, password=None, timeout=15):
     homePageText = res.text
 
     ################## browse page ####################
+    logger.debug("Parse browse page...")
 
     # fetch browse(search) page id
     cred.homePage["browseCompId"] = re.search(
@@ -135,6 +150,7 @@ def login(username=None, password=None, timeout=15):
     cred.browseParamsCeid["collectDateTo"] = browseItemDict["isl_collect_date_to"]
 
     ################## result page ####################
+    logger.debug("Parse result page...")
 
     # fetch result page id
     cmdPipe = [buildCommand(CompId=cred.browsePage["searchButtonCompId"], cmd="search")]
