@@ -71,7 +71,9 @@ def search(
 
     logger.debug("Parse result page...")
     # go to result page
-    res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}")
+    res = httpGet(
+        f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}", headers=cred.headers
+    )
     resultPageText = res.text
     cred.resultPage["resultCompId"] = re.search(
         r"sys\.createComponent\(\'(c_\w+?)\',\'IsolateResultListComponent\'",

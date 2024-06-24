@@ -89,8 +89,8 @@ def buildBatch(startIdx, endIdx, batchSize):
 
 
 @stamina.retry(on=httpx.HTTPError, attempts=3)
-def httpGet(url):
-    res = client.get(url, follow_redirects=True)
+def httpGet(url, headers):
+    res = client.get(url, headers=headers, follow_redirects=True)
     return res
 
 
@@ -117,7 +117,10 @@ def resultToBrowsePage(credentials):
     httpPost(credentials.url, data=body, headers=credentials.headers)
 
     browsePagePid = credentials.browsePage["pid"]
-    httpGet(f"{credentials.url}?sid={credentials.sessionId}&pid={browsePagePid}")
+    httpGet(
+        f"{credentials.url}?sid={credentials.sessionId}&pid={browsePagePid}",
+        headers=credentials.headers,
+    )
 
     return None
 
@@ -138,7 +141,10 @@ def downloadToResultPage(credentials):
 
     httpPost(credentials.url, data=body, headers=credentials.headers)
     resultPagePid = credentials.resultPage["pid"]
-    httpGet(f"{credentials.url}?sid={credentials.sessionId}&pid={resultPagePid}")
+    httpGet(
+        f"{credentials.url}?sid={credentials.sessionId}&pid={resultPagePid}",
+        headers=credentials.headers,
+    )
 
     return None
 

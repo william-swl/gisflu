@@ -18,7 +18,6 @@ class credentials:
         }
         self.resultPage = {
             "pid": None,
-            "allRecordsPid": None,
             "resultCompId": None,
             "downloadCompId": None,
         }

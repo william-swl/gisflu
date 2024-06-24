@@ -39,12 +39,12 @@ def login(username=None, password=None):
     password_md5 = hashlib.md5(password.encode()).hexdigest()
 
     # fetch sessionId first
-    res = httpGet(cred.url)
+    res = httpGet(cred.url, headers=cred.headers)
     cred.sessionId = re.search(r'name="sid" value=\'(.+?)\'', res.text).group(1)
     logger.debug(f"Get sessionId: {cred.sessionId}")
 
     # then get login page, to get more ids
-    res = httpGet(f"{cred.url}?sid={cred.sessionId}")
+    res = httpGet(f"{cred.url}?sid={cred.sessionId}", headers=cred.headers)
     loginPageText = res.text
     cred.windowId = re.search(r'sys\["WID"\] = "(.+?)";', loginPageText).group(1)
     cred.loginPage["pid"] = re.search(r'sys\["PID"\] = "(.+?)";', loginPageText).group(
@@ -73,7 +73,7 @@ def login(username=None, password=None):
 
     # first page after login
     logger.debug("Go to first page...")
-    res = httpGet(f"{cred.url}?sid={cred.sessionId}")
+    res = httpGet(f"{cred.url}?sid={cred.sessionId}", headers=cred.headers)
     firstPageText = res.text
     cred.firstPage["pid"] = re.search(r'sys\["PID"\] = "(.+?)";', firstPageText).group(
         1
@@ -99,7 +99,9 @@ def login(username=None, password=None):
     cred.homePage["pid"] = homePagePid
 
     # go to flu home page
-    res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={homePagePid}")
+    res = httpGet(
+        f"{cred.url}?sid={cred.sessionId}&pid={homePagePid}", headers=cred.headers
+    )
     homePageText = res.text
 
     ################## browse page ####################
@@ -123,7 +125,9 @@ def login(username=None, password=None):
     cred.browsePage["pid"] = browsePagePid
 
     # go to browse page
-    res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={browsePagePid}")
+    res = httpGet(
+        f"{cred.url}?sid={cred.sessionId}&pid={browsePagePid}", headers=cred.headers
+    )
     browsePageText = res.text
 
     cred.browsePage["browseFormCompId"] = re.search(
@@ -165,10 +169,11 @@ def login(username=None, password=None):
     res = httpPost(cred.url, data=body, headers=cred.headers)
     resultPagePid = re.search(r"sys.goPage\(\'(.+?)\'\)", res.text).group(1)
     cred.resultPage["pid"] = resultPagePid
-    cred.resultPage["allRecordsPid"] = resultPagePid
 
     # go to result page
-    res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}")
+    res = httpGet(
+        f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}", headers=cred.headers
+    )
     resultPageText = res.text
     cred.resultPage["resultCompId"] = re.search(
         r"sys\.createComponent\(\'(c_\w+?)\',\'IsolateResultListComponent\'",
@@ -228,7 +233,10 @@ def login(username=None, password=None):
     ).group(1, 2)
 
     # go to download overlay page
-    res = httpGet(f'{cred.url}?sid={cred.sessionId}&pid={cred.downloadPage["pid"]}')
+    res = httpGet(
+        f'{cred.url}?sid={cred.sessionId}&pid={cred.downloadPage["pid"]}',
+        headers=cred.headers,
+    )
     downloadPageText = res.text
 
     cred.downloadPage["resultDownloadCompId"] = re.search(

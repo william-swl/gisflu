@@ -43,17 +43,25 @@ GISAID 获取参数依赖 POST 或 GET 请求。常将函数命令连接为 pipe
 
 - 登录 GISAID
 - 进入 browse page 并解析元素 id
-- 不做任何参数筛选，进入 result page 并解析元素 id。此时 result page 有所有的 records，其 page id 记为`allRecordsPid`，将在`gisflu.download()`中使用
+- 不做任何参数筛选，进入 result page 并解析元素 id。此时 result page 有所有的 records，选择一个临时记录，获取 download page 的 id
 - 进入 download page 并解析元素 id
-- 返回 browse page
+- 返回 browse page。如果没有该步骤，后续构造的请求会返回空值
 
 ## gisflu.search()
 
 - 在 browse page 传入参数搜索
 - 进入 result page，获取 records 的 json，转为 pandas 格式
-- 返回 browse page
+- 返回 browse page。如果没有该步骤，后续构造的请求会返回空值
 
 ## gisflu.download()
+
+- 在`gisflu.login()`登录后即可使用，不需要预先调用`gisflu.search()`
+- 根据`isolateIds`下载
+- 不做任何参数筛选，进入 result page 并解析元素 id
+- 勾选需要的`isolates`
+- 进入 download page，选择下载`metadata, protein`
+- 获取下载链接
+- 保存到本地
 
 # ref
 
