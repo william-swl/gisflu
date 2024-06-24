@@ -103,7 +103,7 @@ def httpPost(url, data, headers):
 ################## page ####################
 
 
-def backToBrowsePage(credentials):
+def resultToBrowsePage(credentials):
     cmdPipe = [
         buildCommand(CompId=credentials.resultPage["downloadCompId"], cmd="GoBack")
     ]
@@ -114,12 +114,31 @@ def backToBrowsePage(credentials):
         cmdPipe,
     )
 
-    client.post(
-        credentials.url, data=body, headers=credentials.headers, follow_redirects=True
-    )
+    httpPost(credentials.url, data=body, headers=credentials.headers)
 
     browsePagePid = credentials.browsePage["pid"]
-    client.get(f"{credentials.url}?sid={credentials.sessionId}&pid={browsePagePid}")
+    httpGet(f"{credentials.url}?sid={credentials.sessionId}&pid={browsePagePid}")
+
+    return None
+
+
+def downloadToResultPage(credentials):
+    cmdPipe = [
+        buildCommand(
+            CompId=credentials.downloadPage["resultDownloadCompId"], cmd="Cancel"
+        ),
+    ]
+
+    body = buildRequestBody(
+        credentials.sessionId,
+        credentials.downloadWindowId,
+        credentials.downloadPage["pid"],
+        cmdPipe,
+    )
+
+    httpPost(credentials.url, data=body, headers=credentials.headers)
+    resultPagePid = credentials.resultPage["pid"]
+    httpGet(f"{credentials.url}?sid={credentials.sessionId}&pid={resultPagePid}")
 
     return None
 

@@ -2,7 +2,14 @@ import os
 import hashlib
 import re
 from .credentials import credentials
-from .utils import buildCommand, buildRequestBody, backToBrowsePage, httpGet, httpPost
+from .utils import (
+    buildCommand,
+    buildRequestBody,
+    resultToBrowsePage,
+    downloadToResultPage,
+    httpGet,
+    httpPost,
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -158,6 +165,7 @@ def login(username=None, password=None):
     res = httpPost(cred.url, data=body, headers=cred.headers)
     resultPagePid = re.search(r"sys.goPage\(\'(.+?)\'\)", res.text).group(1)
     cred.resultPage["pid"] = resultPagePid
+    cred.resultPage["allRecordsPid"] = resultPagePid
 
     # go to result page
     res = httpGet(f"{cred.url}?sid={cred.sessionId}&pid={resultPagePid}")
@@ -179,7 +187,110 @@ def login(username=None, password=None):
         key = re.search(r"key\':\'(\w+?)\'", s).group(1)
         cred.resultHeaderDict[key] = label
 
-    backToBrowsePage(cred)
+    ################## download page ####################
+    logger.debug("Parse download page...")
+
+    # get a temp record
+    cmdPipe = [
+        buildCommand(
+            CompId=cred.resultPage["resultCompId"],
+            cmd="SetPaginating",
+            params={"start_index": 0, "rows_per_page": 27},
+        ),
+        buildCommand(CompId=cred.resultPage["resultCompId"], cmd="GetData"),
+    ]
+
+    body = buildRequestBody(
+        cred.sessionId, cred.windowId, cred.resultPage["pid"], cmdPipe
+    )
+    res = httpPost(cred.url, data=body, headers=cred.headers)
+
+    tempRecordId = res.json()["records"][0]["b"]
+
+    # select this temp record
+    cmdPipe = [
+        buildCommand(
+            CompId=cred.resultPage["resultCompId"],
+            cmd="ChangeValue",
+            params={"row_id": tempRecordId, "col_name": "c", "value": True},
+        ),
+        buildCommand(CompId=cred.resultPage["downloadCompId"], cmd="Download"),
+    ]
+
+    body = buildRequestBody(
+        cred.sessionId, cred.windowId, cred.resultPage["pid"], cmdPipe
+    )
+
+    res = httpPost(cred.url, data=body, headers=cred.headers)
+
+    cred.downloadWindowId, cred.downloadPage["pid"] = re.search(
+        r"sys.openOverlay\(\'(\w+?)\',\'(\w+?)\'", res.text
+    ).group(1, 2)
+
+    # go to download overlay page
+    res = httpGet(f'{cred.url}?sid={cred.sessionId}&pid={cred.downloadPage["pid"]}')
+    downloadPageText = res.text
+
+    cred.downloadPage["resultDownloadCompId"] = re.search(
+        r"sys\.createComponent\(\'(c_\w+?)\',\'IsolateResultDownloadComponent\'",
+        downloadPageText,
+    ).group(1)
+
+    # fetch download item ceid
+    downloadItemText = re.findall(r"createFI\(.+?function", downloadPageText)
+
+    downloadItemDict = {}
+    for s in downloadItemText:
+        ident = re.search(r"Widget\',\'(.+?)\',function", s).group(1)
+        ceid = re.search(r"createFI\(\'(.+?)\',", s).group(1)
+        downloadItemDict[ident] = ceid
+
+    cred.downloadParamsCeid["downloadFormat"] = downloadItemDict["format"]
+    cred.downloadParamsCeid["downloadConfirm"] = downloadItemDict["download"]
+
+    # fetch protein segment ceid
+
+    cmdPipe = [
+        buildCommand(
+            CompId=cred.downloadPage["resultDownloadCompId"],
+            cmd="setTarget",
+            params={
+                "cvalue": "proteins",
+                "ceid": cred.downloadParamsCeid["downloadFormat"],
+            },
+            equiv=f'ST{cred.downloadParamsCeid["downloadFormat"]}',
+        ),
+        buildCommand(
+            CompId=cred.downloadPage["resultDownloadCompId"],
+            cmd="ChangeValue",
+            params={
+                "cvalue": "proteins",
+                "ceid": cred.downloadParamsCeid["downloadFormat"],
+            },
+            equiv=f'CV{cred.downloadParamsCeid["downloadFormat"]}',
+        ),
+        buildCommand(
+            CompId=cred.downloadPage["resultDownloadCompId"],
+            cmd="ShowProteins",
+            params={"ceid": cred.downloadParamsCeid["downloadFormat"]},
+        ),
+    ]
+
+    body = buildRequestBody(
+        cred.sessionId, cred.downloadWindowId, cred.downloadPage["pid"], cmdPipe
+    )
+
+    res = httpPost(cred.url, data=body, headers=cred.headers)
+
+    downloadProteinText = res.text
+
+    cred.downloadParamsCeid["proteinSegment"] = re.search(
+        r"createFI\(\'(\w+?)\',\'CheckboxWidget\',\'proteins\'", downloadProteinText
+    ).group(1)
+
+    ################## return browse page ####################
+    downloadToResultPage(cred)
+    resultToBrowsePage(cred)
     logger.debug(f"{username} logged!")
 
     return cred

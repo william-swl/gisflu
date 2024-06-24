@@ -4,7 +4,7 @@ from .utils import (
     buildRequestBody,
     buildBrowseCommand,
     buildBatch,
-    backToBrowsePage,
+    resultToBrowsePage,
     httpGet,
     httpPost,
 )
@@ -123,7 +123,7 @@ def search(
     else:
         reslutDF = pd.DataFrame()
 
-    backToBrowsePage(cred)
+    resultToBrowsePage(cred)
 
     nrow = reslutDF.shape[0]
     logger.debug(f"Search completed: return {nrow} rows")

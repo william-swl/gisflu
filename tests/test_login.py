@@ -10,4 +10,7 @@ def test_passwd_length(passwd):
 def test_login():
     cred = gisflu.login()
     assert cred.sessionId is not None, "Failed to fetch GISAID"
-    assert cred.browseParamsCeid["type"] is not None, "Failed to fetch browse page"
+    assert cred.browseParamsCeid["type"] is not None, "Failed to parse browse page"
+    assert (
+        cred.downloadParamsCeid["downloadConfirm"] is not None
+    ), "Failed to parse download page"
