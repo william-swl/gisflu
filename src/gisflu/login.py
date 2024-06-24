@@ -296,6 +296,49 @@ def login(username=None, password=None):
         r"createFI\(\'(\w+?)\',\'CheckboxWidget\',\'proteins\'", downloadProteinText
     ).group(1)
 
+    # fetch dna segment ceid
+    cmdPipe = [
+        buildCommand(
+            CompId=cred.downloadPage["resultDownloadCompId"],
+            cmd="setTarget",
+            params={
+                "cvalue": "dna",
+                "ceid": cred.downloadParamsCeid["downloadFormat"],
+            },
+            equiv=f'ST{cred.downloadParamsCeid["downloadFormat"]}',
+        ),
+        buildCommand(
+            CompId=cred.downloadPage["resultDownloadCompId"],
+            cmd="ChangeValue",
+            params={
+                "cvalue": "dna",
+                "ceid": cred.downloadParamsCeid["downloadFormat"],
+            },
+            equiv=f'CV{cred.downloadParamsCeid["downloadFormat"]}',
+        ),
+        buildCommand(
+            CompId=cred.downloadPage["resultDownloadCompId"],
+            cmd="ShowProteins",
+            params={"ceid": cred.downloadParamsCeid["downloadFormat"]},
+        ),
+    ]
+
+    body = buildRequestBody(
+        cred.sessionId, cred.downloadWindowId, cred.downloadPage["pid"], cmdPipe
+    )
+
+    res = httpPost(cred.url, data=body, headers=cred.headers)
+
+    downloadDNAText = res.text
+
+    cred.downloadParamsCeid["dnaSegment"] = re.search(
+        r"createFI\(\'(\w+?)\',\'CheckboxWidget\',\'dna\'", downloadDNAText
+    ).group(1)
+
+    cred.downloadParamsCeid["fastaHeader"] = re.search(
+        r"createFI\(\'(\w+?)\',\'EntryWidget\',\'header\'", downloadDNAText
+    ).group(1)
+
     ################## return browse page ####################
     downloadToResultPage(cred)
     resultToBrowsePage(cred)

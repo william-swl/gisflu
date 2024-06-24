@@ -23,6 +23,12 @@ def download(
         id.startswith("EPI_ISL_") for id in isolateIds
     ), 'isolateId must start with "EPI_ISL_"'
 
+    assert downloadType in [
+        "metadata",
+        "protein",
+        "dna",
+    ], "downloadType must be metadata|protein|dna"
+
     segmentCheck = [
         "NP",
         "P3",
@@ -96,10 +102,9 @@ def download(
         headers=cred.headers,
     )
     resultDownloadCompId = cred.downloadPage["resultDownloadCompId"]
-    downloadProteinSegmentCeid = cred.downloadParamsCeid["proteinSegment"]
 
     logger.debug("Set download params...")
-    if downloadType.lower() == "metadata":
+    if downloadType == "metadata":
         cmdPipe = [
             buildCommand(CompId=resultDownloadCompId, cmd="download"),
         ]
@@ -111,59 +116,84 @@ def download(
         res = httpPost(cred.url, data=body, headers=cred.headers)
 
         api = re.search(r"sys\.downloadFile\(\\\"(.+?)\\\"", res.text).group(1)
-    elif downloadType.lower() == "protein":
-        # select protein
+    elif downloadType in ["protein", "dna"]:
+        if downloadType == "protein":
+            typeCvalue = "proteins"
+            downloadSegmentCeid = cred.downloadParamsCeid["proteinSegment"]
+            faHeader = "Protein Accession no.|Gene name|Isolate name|Isolate ID|Type@Collection date"
+        else:
+            typeCvalue = "dna"
+            downloadSegmentCeid = cred.downloadParamsCeid["dnaSegment"]
+            faHeader = (
+                "DNA Accession no.|Segment|Isolate name|Isolate ID|Type@Collection date"
+            )
+
+        resultDownloadCompId = cred.downloadPage["resultDownloadCompId"]
+        downloadFormatCeid = cred.downloadParamsCeid["downloadFormat"]
+        fastaHeaderCeid = cred.downloadParamsCeid["fastaHeader"]
+
         cmdPipe = [
+            # select protein|dna
             buildCommand(
-                CompId=cred.downloadPage["resultDownloadCompId"],
+                CompId=resultDownloadCompId,
                 cmd="setTarget",
                 params={
-                    "cvalue": "proteins",
-                    "ceid": cred.downloadParamsCeid["downloadFormat"],
+                    "cvalue": typeCvalue,
+                    "ceid": downloadFormatCeid,
                 },
-                equiv=f'ST{cred.downloadParamsCeid["downloadFormat"]}',
+                equiv=f"ST{downloadFormatCeid}",
             ),
             buildCommand(
-                CompId=cred.downloadPage["resultDownloadCompId"],
+                CompId=resultDownloadCompId,
                 cmd="ChangeValue",
                 params={
-                    "cvalue": "proteins",
-                    "ceid": cred.downloadParamsCeid["downloadFormat"],
+                    "cvalue": typeCvalue,
+                    "ceid": downloadFormatCeid,
                 },
-                equiv=f'CV{cred.downloadParamsCeid["downloadFormat"]}',
+                equiv=f"CV{downloadFormatCeid}",
             ),
             buildCommand(
-                CompId=cred.downloadPage["resultDownloadCompId"],
+                CompId=resultDownloadCompId,
                 cmd="ShowProteins",
-                params={"ceid": cred.downloadParamsCeid["downloadFormat"]},
+                params={"ceid": downloadFormatCeid},
             ),
-        ]
-
-        body = buildRequestBody(
-            cred.sessionId, cred.downloadWindowId, cred.downloadPage["pid"], cmdPipe
-        )
-
-        res = httpPost(cred.url, data=body, headers=cred.headers)
-
-        # check segment
-        cmdPipe = [
+            # check segment
             buildCommand(
                 CompId=resultDownloadCompId,
                 cmd="setTarget",
-                params={"cvalue": ["HA", "NA"], "ceid": downloadProteinSegmentCeid},
-                equiv=f"ST{downloadProteinSegmentCeid}",
+                params={"cvalue": segments, "ceid": downloadSegmentCeid},
+                equiv=f"ST{downloadSegmentCeid}",
             ),
             buildCommand(
                 CompId=resultDownloadCompId,
                 cmd="ChangeValue",
-                params={"cvalue": ["HA", "NA"], "ceid": downloadProteinSegmentCeid},
-                equiv=f"CV{downloadProteinSegmentCeid}",
+                params={"cvalue": segments, "ceid": downloadSegmentCeid},
+                equiv=f"CV{downloadSegmentCeid}",
             ),
             buildCommand(
                 CompId=resultDownloadCompId,
                 cmd="SelChange",
-                params={"ceid": downloadProteinSegmentCeid},
+                params={"ceid": downloadSegmentCeid},
             ),
+            # set fasta header
+            buildCommand(
+                CompId=resultDownloadCompId,
+                cmd="setTarget",
+                params={"cvalue": faHeader, "ceid": fastaHeaderCeid},
+                equiv=f"ST{fastaHeaderCeid}",
+            ),
+            buildCommand(
+                CompId=resultDownloadCompId,
+                cmd="ChangeValue",
+                params={"cvalue": faHeader, "ceid": fastaHeaderCeid},
+                equiv=f"CV{fastaHeaderCeid}",
+            ),
+            buildCommand(
+                CompId=resultDownloadCompId,
+                cmd="fillExampleCopied",
+                params={"ceid": fastaHeaderCeid},
+            ),
+            # download
             buildCommand(CompId=resultDownloadCompId, cmd="download"),
         ]
 
@@ -182,9 +212,9 @@ def download(
     if filename is None:
         if downloadType == "metadata":
             extension = "xls"
-        elif downloadType in ["protein"]:
+        elif downloadType in ["protein", "dna"]:
             extension = "fasta"
-        filename = f"gisflu-{count}-{downloadType}-{now}.{extension}"
+        filename = f"gisflu-{downloadType}-{count}records-{now}.{extension}"
 
     downloadLink = "https://" + urllib.parse.urlparse(cred.url).hostname + api
     res = httpGet(downloadLink, headers=cred.headers)

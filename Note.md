@@ -59,9 +59,14 @@ GISAID 获取参数依赖 POST 或 GET 请求。常将函数命令连接为 pipe
 - 根据`isolateIds`下载
 - 不做任何参数筛选，进入 result page 并解析元素 id
 - 勾选需要的`isolates`
-- 进入 download page，选择下载`metadata, protein`
+- 进入 download page，选择下载`metadata, protein, dna`
+- 设置 fasta header
 - 获取下载链接
 - 保存到本地
+
+# 待办
+
+- 重构`buildDownloadCommand`，应用到`gisflu.login()`和`gisflu.login()`
 
 # ref
 
