@@ -39,4 +39,5 @@ dev = [
 pythonpath = ["src"]
 
 [tool.pdm.scripts]
-docs = "mkdocs serve"
+docServe = "mkdocs serve"
+docPage = "mkdocs gh-deploy --clean"

@@ -43,7 +43,7 @@ GISAID 获取参数依赖 POST 或 GET 请求。常将函数命令连接为 pipe
 
 - 登录 GISAID
 - 进入 browse page 并解析元素 id
-- 不做任何参数筛选，进入 result page 并解析元素 id。此时 result page 有所有的 records，选择一个临时记录，获取 download page 的 id
+- 不做任何参数筛选，进入 result page 并解析元素 id。此时 result page 包含所有 records，选择一个临时记录，获取 download page 的 id
 - 进入 download page 并解析元素 id
 - 返回 browse page。如果没有该步骤，后续构造的请求会返回空值
 
@@ -64,10 +64,32 @@ GISAID 获取参数依赖 POST 或 GET 请求。常将函数命令连接为 pipe
 - 获取下载链接
 - 保存到本地
 
+# 页面介绍
+
+访问`https://platform.epicov.org/epi3/frontend`后，首先进入 login page
+
+![](img/gisflu-loginPage.png)
+
+登录后进入 first page，默认为 EpiCoV 数据库
+
+![](img/gisflu-firstPage.png)
+
+通过导航栏切换到 Flu 数据库，进入 home page
+
+![](img/gisflu-homePage.png)
+
+点击`Search`进入 browse page
+
+![](img/gisflu-browsePage.png)
+
+设置 filter 条件，点击`Search`进入 result page
+
+![](img/gisflu-resultPage.png)
+
+勾选需要下载的 records，点击`Download`进入 download page。该页面通过 Overlap Window 呈现
+
+![](img/gisflu-downloadPage.png)
+
 # 待办
 
 - 重构`buildDownloadCommand`，应用到`gisflu.login()`和`gisflu.login()`
-
-# ref
-
-https://github.com/Wytamma/GISAIDR/tree/master
