@@ -7,8 +7,10 @@ from .utils import (
     downloadToResultPage,
     resultToBrowsePage,
 )
+from .credentials import credentials
 import logging
 from datetime import datetime
+from typing import List
 import urllib
 
 logger = logging.getLogger(__name__)
@@ -17,8 +19,34 @@ logger.addHandler(logging.NullHandler())
 
 
 def download(
-    cred, isolateIds, downloadType="protein", segments=["HA", "NA"], filename=None
-):
+    cred: credentials,
+    isolateIds: List[str],
+    downloadType: str = "protein",
+    segments: List[str] = ["HA", "NA"],
+    filename: str | None = None,
+) -> None:
+    """
+    Downloads records for the given isolate IDs.
+
+    Args:
+        cred (object): The credentials object.
+        isolateIds (list): List of isolate IDs to download data for.
+        downloadType (str, optional): The type of data to download. Defaults to "protein".
+        segments (list, optional): List of segments to download. Defaults to ["HA", "NA"].
+        filename (str, optional): The name of the file to save the downloaded data. If not provided, a default filename will be generated.
+
+    Return:
+        None
+
+    Example:
+        ```
+        cred = gisflu.login()
+        isolateIds = ["EPI_ISL_19185107", "EPI_ISL_19151100"]
+        gisflu.download(cred, isolateIds, downloadType="protein", segments=["HA", "NA"],
+            filename="records.fasta")
+        ```
+    """
+
     assert all(
         id.startswith("EPI_ISL_") for id in isolateIds
     ), 'isolateId must start with "EPI_ISL_"'

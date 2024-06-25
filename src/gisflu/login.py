@@ -17,7 +17,27 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.NullHandler())
 
 
-def login(username=None, password=None):
+def login(username: str | None = None, password: str | None = None) -> credentials:
+    """
+    Login the GISAID Flu database, parse elements ids and store them in a credentials object.
+
+    Args:
+        username (str, optional): The username to log in with. If not provided, it will be fetched from the environment variable "GISAID_USERNAME".
+        password (str, optional): The password to log in with. If not provided, it will be fetched from the environment variable "GISAID_PASSWORD".
+
+    Return:
+        credentials
+
+    Example:
+        ```
+        # Log in with provided username and password
+        gisflu.login("myusername", "mypassword")
+
+        # Log in using environment variables
+        gisflu.login()
+        ```
+    """
+
     cred = credentials()
 
     # get username and password

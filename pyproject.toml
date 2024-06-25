@@ -1,10 +1,8 @@
 [project]
 name = "gisflu"
-version = "0.1.4"
+version = "0.1.5"
 description = "Access the GISAID Flu database using Python"
-authors = [
-    { name = "william", email = "william_swl@163.com" },
-]
+authors = [{ name = "william", email = "william_swl@163.com" }]
 dependencies = [
     "httpx>=0.27.0",
     "python-dotenv>=1.0.1",
@@ -19,29 +17,26 @@ readme = "README.md"
 text = "MIT"
 
 [build-system]
-requires = [
-    "pdm-backend",
-]
+requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
 
 [tool.pdm.build]
-excludes = [
-    "tests/temp/",
-]
+excludes = ["tests/temp/"]
 
 [tool.pdm.dev-dependencies]
-test = [
-    "pytest>=8.2.2",
-]
+test = ["pytest>=8.2.2"]
 dev = [
     "nox>=2024.4.15",
     "ipykernel>=6.29.4",
+    "mkdocs-material>=9.5.27",
+    "mkdocstrings[python]>=0.25.1",
 ]
 
 [tool.pytest.ini_options]
-pythonpath = [
-    "src",
-]
+pythonpath = ["src"]
+
+[tool.pdm.scripts]
+docs = "mkdocs serve"

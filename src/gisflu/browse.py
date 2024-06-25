@@ -8,9 +8,11 @@ from .utils import (
     httpGet,
     httpPost,
 )
+from .credentials import credentials
 from tqdm import tqdm
 import pandas as pd
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -18,15 +20,39 @@ logger.addHandler(logging.NullHandler())
 
 
 def search(
-    cred,
-    type=None,
-    HA=None,
-    NA=None,
-    host=None,
-    collectDateFrom=None,
-    collectDateTo=None,
-    recordLimit=50,
-):
+    cred: credentials,
+    type: List[str] | None = None,
+    HA: List[str] | None = None,
+    NA: List[str] | None = None,
+    host: List[str] | None = None,
+    collectDateFrom: str | None = None,
+    collectDateTo: str | None = None,
+    recordLimit: int = 50,
+) -> pd.DataFrame:
+    """
+    Search for records in the GISAID Flu database based on specified criteria.
+
+    Args:
+        cred (credentials): The credentials object containing session information.
+        type (List[str], optional): A list of virus types to filter the search results. Defaults to None.
+        HA (List[str], optional): A list of hemagglutinin (HA) subtypes to filter the search results. Defaults to None.
+        NA (List[str], optional): A list of neuraminidase (NA) subtypes to filter the search results. Defaults to None.
+        host (List[str], optional): A list of host species to filter the search results. Defaults to None.
+        collectDateFrom (str, optional): The starting date for the collection date filter. Defaults to None.
+        collectDateTo (str, optional): The ending date for the collection date filter. Defaults to None.
+        recordLimit (int, optional): The maximum number of records to return. Defaults to 50.
+
+    Return:
+        pd.DataFrame: A DataFrame containing the search results.
+
+    Example:
+        ```
+        cred = gisflu.login()
+        gisflu.search(cred, type=["A"], HA=["3"], NA=["2"],
+            collectDateFrom="2020-01-01", recordLimit=10)
+        ```
+    """
+
     # search by command pipeline
     cmdPipe = []
     if type:

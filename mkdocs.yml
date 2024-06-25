@@ -1,0 +1,20 @@
+site_name: gisflu
+site_description: "Access the GISAID Flu database using Python"
+site_url: "https://william-swl.github.io/gisflu"
+repo_url: "https://github.com/william-swl/gisflu"
+repo_name: "william-swl/gisflu"
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_root_heading: false
+            show_root_toc_entry: false
+nav:
+- Readme: index.md
+- Reference: reference.md
+
+
+theme:
+  name: material
