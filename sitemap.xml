@@ -6,6 +6,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://william-swl.github.io/gisflu/dev/</loc>
+         <lastmod>2024-06-25</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://william-swl.github.io/gisflu/reference/</loc>
          <lastmod>2024-06-25</lastmod>
          <changefreq>daily</changefreq>
