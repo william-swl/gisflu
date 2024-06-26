@@ -10,7 +10,6 @@ from .utils import (
 from .credentials import credentials
 import logging
 from datetime import datetime
-from typing import List
 import urllib
 
 logger = logging.getLogger(__name__)
@@ -20,9 +19,9 @@ logger.addHandler(logging.NullHandler())
 
 def download(
     cred: credentials,
-    isolateIds: List[str],
+    isolateIds: list[str],
     downloadType: str = "protein",
-    segments: List[str] = ["HA", "NA"],
+    segments: list[str] = ["HA", "NA"],
     filename: str | None = None,
 ) -> None:
     """
@@ -30,9 +29,9 @@ def download(
 
     Args:
         cred (object): The credentials object.
-        isolateIds (list): List of isolate IDs to download data for.
+        isolateIds (list): list of isolate IDs to download data for.
         downloadType (str, optional): The type of data to download. Defaults to "protein".
-        segments (list, optional): List of segments to download. Defaults to ["HA", "NA"].
+        segments (list, optional): list of segments to download. Defaults to ["HA", "NA"].
         filename (str, optional): The name of the file to save the downloaded data. If not provided, a default filename will be generated.
 
     Return:

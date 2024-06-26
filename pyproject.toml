@@ -1,6 +1,6 @@
 [project]
 name = "gisflu"
-version = "0.1.5"
+version = "0.1.7"
 description = "Access the GISAID Flu database using Python"
 authors = [{ name = "william", email = "william_swl@163.com" }]
 dependencies = [
@@ -10,8 +10,12 @@ dependencies = [
     "tqdm>=4.66.4",
     "stamina>=24.2.0",
 ]
-requires-python = ">=3.8"
-readme = "README.md"
+requires-python = ">=3.10"
+readme = "docs/index.md"
+
+[project.urls]
+Docs = "https://william-swl.github.io/gisflu"
+Github = "https://github.com/william-swl/gisflu"
 
 [project.license]
 text = "MIT"
@@ -33,11 +37,12 @@ dev = [
     "ipykernel>=6.29.4",
     "mkdocs-material>=9.5.27",
     "mkdocstrings[python]>=0.25.1",
+    "mypy>=1.10.1",
 ]
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
 
 [tool.pdm.scripts]
 docServe = "mkdocs serve"
 docPage = "mkdocs gh-deploy --clean"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

@@ -23,6 +23,8 @@ gisflu.login("myusername", "mypassword")
 gisflu.login()
 ```
 
+If use environment variables to login, you should export `GISFLU_USERNAME` and `GISFLU_PASSWORD` in your environment, or save them as a `.env` file in the current working directory.
+
 ## search
 
 ```python
