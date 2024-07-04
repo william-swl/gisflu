@@ -90,8 +90,16 @@ GISAID 获取参数依赖 POST 或 GET 请求。常将函数命令连接为 pipe
 
 ![](img/gisflu-downloadPage.png)
 
+在下载 metadata 时，如果待下载的 records 较少，会直接启动下载；如果太多，会进入 downloadWait page
+
+![](img/gisflu-downloadWaitPage.png)
+
 # 待办
 
 - 重构`buildDownloadCommand`，应用到`gisflu.login()`和`gisflu.login()`
 
-- 增加`searchPattern, location, onlyComplete, segment`到`gisflu.search()`
+- 增加`location`到`gisflu.search()`
+
+- 允许同时下载`metadata, protein, dna`，并保存到不同文件
+
+- 从 browse page 自动获取 host code

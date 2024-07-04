@@ -41,9 +41,42 @@ class credentials:
             **{i: "LineageChanged" for i in ["lineage"]},
             **{i: "ReqSegChanged" for i in ["requestSegments"]},
         }
-        self.hostCode = {"Human": "101", "Animal": "102", "Avian": "103"}
+        self.hostCode = {
+            "Human": "101",
+            "Animal": "102",
+            "Avian": "103",
+            "Mammals": "790",
+        }
         self.resultHeaderDict = {}
         self.downloadParamsCeid = {}
+        self.segmentCheck = [
+            "NP",
+            "P3",
+            "HA",
+            "M1",
+            "M2",
+            "BM2",
+            "CM2",
+            "M",
+            "NA",
+            "NB",
+            "NS1",
+            "NEP",
+            "NS2",
+            "PA",
+            "PA-X",
+            "PB1-F2",
+            "PB1",
+            "HE",
+            "PB2",
+        ]
+
+        self.downloadWaitWindowId = None
+        self.downloadWaitPage = {
+            "pid": None,
+            "waitCompId": None,
+        }
+        self.downloadWaitCeid = {}
 
     def __repr__(self):
         return f"credentials(sid={self.sessionId})"

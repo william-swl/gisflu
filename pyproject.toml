@@ -1,6 +1,6 @@
 [project]
 name = "gisflu"
-version = "0.1.8"
+version = "0.1.9"
 description = "Access the GISAID Flu database using Python"
 authors = [
     { name = "william", email = "william_swl@163.com" },

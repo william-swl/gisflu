@@ -11,6 +11,7 @@ from .credentials import credentials
 import logging
 from datetime import datetime
 import urllib
+import time
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -56,29 +57,9 @@ def download(
         "dna",
     ], "downloadType must be metadata|protein|dna"
 
-    segmentCheck = [
-        "NP",
-        "P3",
-        "HA",
-        "M1",
-        "M2",
-        "BM2",
-        "CM2",
-        "M",
-        "NA",
-        "NB",
-        "NS1",
-        "NEP",
-        "NS2",
-        "PA",
-        "PA-X",
-        "PB1-F2",
-        "PB1",
-        "HE",
-        "PB2",
+    unknownSegments = [
+        segment for segment in segments if segment not in cred.segmentCheck
     ]
-
-    unknownSegments = [segment for segment in segments if segment not in segmentCheck]
     unknownSegmentStr = ", ".join(unknownSegments)
     assert len(unknownSegments) == 0, f"Unknown segment(s): {unknownSegmentStr}"
 
@@ -142,7 +123,60 @@ def download(
 
         res = httpPost(cred.url, data=body, headers=cred.headers)
 
+        # wait for a big metadata download
+        if "sys.openOverlay" in res.text:
+            logger.debug("Go to metadata download wait page...")
+            cred.downloadWaitWindowId, downloadWaitPagePid = re.search(
+                r"sys\.openOverlay\('(.+?)','(.+?)',new Object", res.text
+            ).group(1, 2)
+
+            # go to downloadWaitPage, get waitCompId
+            cred.downloadWaitPage["pid"] = downloadWaitPagePid
+            res = httpGet(
+                f"{cred.url}?sid={cred.sessionId}&wid={cred.downloadWaitWindowId}&pid={downloadWaitPagePid}",
+                headers=cred.headers,
+            )
+
+            waitCompId = re.search(
+                r"sys\.createComponent\(\'(c_\w+?)\',\'XLSDownloadWaitFormComponent\'",
+                res.text,
+            ).group(1)
+
+            cred.downloadWaitPage["waitCompId"] = waitCompId
+            pingerWidgetCeid = re.search(
+                r"createFI\(\'(\w+?)\',\'PingerWidget\',\'ping\'", res.text
+            ).group(1)
+            cred.downloadWaitCeid["pingerWidget"] = pingerWidgetCeid
+
+            # wait
+            while True:
+                logger.debug("Wait for the metadata download link...")
+                time.sleep(5)
+                cmdPipe = [
+                    buildCommand(
+                        CompId=waitCompId,
+                        cmd="PingerPing",
+                        params={
+                            "ceid": pingerWidgetCeid,
+                        },
+                    ),
+                ]
+
+                body = buildRequestBody(
+                    cred.sessionId,
+                    cred.downloadWaitWindowId,
+                    cred.downloadWaitPage["pid"],
+                    cmdPipe,
+                )
+
+                res = httpPost(cred.url, data=body, headers=cred.headers)
+
+                if "sys.downloadFile" in res.text:
+                    break
+
+        logger.debug("Get the metadata download link!")
         api = re.search(r"sys\.downloadFile\(\\\"(.+?)\\\"", res.text).group(1)
+
     elif downloadType in ["protein", "dna"]:
         if downloadType == "protein":
             typeCvalue = "proteins"

@@ -48,6 +48,14 @@ def buildBrowseCommand(credentials, ident, value):
     ]:
         assert isinstance(value, str), f"{ident} must be a string"
 
+    # value check
+    if ident == "requestSegments":
+        unknownSegments = [
+            segment for segment in value if segment not in credentials.segmentCheck
+        ]
+        unknownSegmentStr = ", ".join(unknownSegments)
+        assert len(unknownSegments) == 0, f"Unknown segment(s): {unknownSegmentStr}"
+
     # host code
     if ident == "host":
         value = [credentials.hostCode[v.title()] for v in value]
