@@ -20,12 +20,15 @@ logger.addHandler(logging.NullHandler())
 
 def search(
     cred: credentials,
+    searchPattern: str | None = None,
     type: list[str] | None = None,
     HA: list[str] | None = None,
     NA: list[str] | None = None,
     host: list[str] | None = None,
     collectDateFrom: str | None = None,
     collectDateTo: str | None = None,
+    submitDateFrom: str | None = None,
+    submitDateTo: str | None = None,
     recordLimit: int = 50,
 ) -> pd.DataFrame:
     """
@@ -33,6 +36,7 @@ def search(
 
     Args:
         cred (credentials): The credentials object containing session information.
+        searchPattern (str, optional): The search pattern, can be isolate id, isolate name, segement id and so on. Defaults to None.
         type (list[str], optional): A list of virus types to filter the search results. Defaults to None.
         HA (list[str], optional): A list of hemagglutinin (HA) subtypes to filter the search results. Defaults to None.
         NA (list[str], optional): A list of neuraminidase (NA) subtypes to filter the search results. Defaults to None.
@@ -54,6 +58,8 @@ def search(
 
     # search by command pipeline
     cmdPipe = []
+    if searchPattern:
+        cmdPipe += buildBrowseCommand(cred, "searchPattern", searchPattern)
     if type:
         cmdPipe += buildBrowseCommand(cred, "type", type)
     if HA:
@@ -66,6 +72,10 @@ def search(
         cmdPipe += buildBrowseCommand(cred, "collectDateFrom", collectDateFrom)
     if collectDateTo:
         cmdPipe += buildBrowseCommand(cred, "collectDateTo", collectDateTo)
+    if submitDateFrom:
+        cmdPipe += buildBrowseCommand(cred, "submitDateFrom", submitDateFrom)
+    if submitDateTo:
+        cmdPipe += buildBrowseCommand(cred, "submitDateTo", submitDateTo)
 
     body = buildRequestBody(
         cred.sessionId, cred.windowId, cred.browsePage["pid"], cmdPipe

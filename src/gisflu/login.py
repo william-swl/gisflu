@@ -169,6 +169,7 @@ def login(username: str | None = None, password: str | None = None) -> credentia
         ceid = re.search(r"createFI\(\'(.+?)\',", s).group(1)
         browseItemDict[ident] = ceid
 
+    cred.browseParamsCeid["searchPattern"] = browseItemDict["search_pattern"]
     cred.browseParamsCeid["type"] = browseItemDict["isl_type"]
     cred.browseParamsCeid["HA"] = browseItemDict["isl_subtype_h"]
     cred.browseParamsCeid["NA"] = browseItemDict["isl_subtype_n"]
@@ -177,6 +178,9 @@ def login(username: str | None = None, password: str | None = None) -> credentia
     cred.browseParamsCeid["location"] = browseItemDict["isl_location"]
     cred.browseParamsCeid["collectDateFrom"] = browseItemDict["isl_collect_date_from"]
     cred.browseParamsCeid["collectDateTo"] = browseItemDict["isl_collect_date_to"]
+    cred.browseParamsCeid["submitDateFrom"] = browseItemDict["isl_submission_date_from"]
+    cred.browseParamsCeid["submitDateTo"] = browseItemDict["isl_submission_date_to"]
+    cred.browseParamsCeid["onlyComplete"] = browseItemDict["isl_only_complete"]
 
     ################## result page ####################
     logger.debug("Parse result page...")

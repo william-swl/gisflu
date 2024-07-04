@@ -93,3 +93,5 @@ GISAID 获取参数依赖 POST 或 GET 请求。常将函数命令连接为 pipe
 # 待办
 
 - 重构`buildDownloadCommand`，应用到`gisflu.login()`和`gisflu.login()`
+
+- 增加`searchPattern, location, onlyComplete, segment`到`gisflu.search()`

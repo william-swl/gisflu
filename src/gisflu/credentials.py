@@ -25,7 +25,20 @@ class credentials:
         self.browseParamsCeid = {}
         self.browseParamsCmd = {
             **{i: "TypeChanged" for i in ["type", "HA", "NA"]},
-            **{i: "OnlyCount" for i in ["host", "collectDateFrom", "collectDateTo"]},
+            **{
+                i: "OnlyCount"
+                for i in [
+                    "searchPattern",
+                    "host",
+                    "location",
+                    "collectDateFrom",
+                    "collectDateTo",
+                    "submitDateFrom",
+                    "submitDateTo",
+                    "onlyComplete",
+                ]
+            },
+            **{i: "LineageChanged" for i in ["lineage"]},
         }
         self.hostCode = {"Human": "101", "Animal": "102", "Avian": "103"}
         self.resultHeaderDict = {}
