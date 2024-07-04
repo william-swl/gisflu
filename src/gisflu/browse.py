@@ -29,6 +29,8 @@ def search(
     collectDateTo: str | None = None,
     submitDateFrom: str | None = None,
     submitDateTo: str | None = None,
+    requestSegments: list[str] | None = None,
+    onlyComplete: bool = False,
     recordLimit: int = 50,
 ) -> pd.DataFrame:
     """
@@ -43,6 +45,10 @@ def search(
         host (list[str], optional): A list of host species to filter the search results. Defaults to None.
         collectDateFrom (str, optional): The starting date for the collection date filter. Defaults to None.
         collectDateTo (str, optional): The ending date for the collection date filter. Defaults to None.
+        submitDateFrom (str, optional): The starting date for the submission date filter. Defaults to None.
+        submitDateTo (str, optional): The ending date for the submission date filter. Defaults to None.
+        requestSegments (list[str], optional): A list of requested segments to filter the search results. Defaults to None.
+        onlyComplete (bool, optional): Whether to only return records with complete sequences of requested segments. Defaults to False.
         recordLimit (int, optional): The maximum number of records to return. Defaults to 50.
 
     Return:
@@ -76,6 +82,10 @@ def search(
         cmdPipe += buildBrowseCommand(cred, "submitDateFrom", submitDateFrom)
     if submitDateTo:
         cmdPipe += buildBrowseCommand(cred, "submitDateTo", submitDateTo)
+    if requestSegments:
+        cmdPipe += buildBrowseCommand(cred, "requestSegments", requestSegments)
+        if onlyComplete is True:
+            cmdPipe += buildBrowseCommand(cred, "onlyComplete", ["y"])
 
     body = buildRequestBody(
         cred.sessionId, cred.windowId, cred.browsePage["pid"], cmdPipe

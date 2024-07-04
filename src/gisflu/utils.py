@@ -36,7 +36,7 @@ def buildRequestBody(sessionId, windowId, pageId, cmdPipe, mode="ajax"):
 
 def buildBrowseCommand(credentials, ident, value):
     # type check
-    if ident in ["type", "HA", "NA", "host"]:
+    if ident in ["type", "HA", "NA", "host", "requestSegments"]:
         assert isinstance(value, list), f"{ident} must be a list"
         value = [str(v) for v in value]
     elif ident in [

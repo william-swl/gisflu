@@ -180,6 +180,7 @@ def login(username: str | None = None, password: str | None = None) -> credentia
     cred.browseParamsCeid["collectDateTo"] = browseItemDict["isl_collect_date_to"]
     cred.browseParamsCeid["submitDateFrom"] = browseItemDict["isl_submission_date_from"]
     cred.browseParamsCeid["submitDateTo"] = browseItemDict["isl_submission_date_to"]
+    cred.browseParamsCeid["requestSegments"] = browseItemDict["isl_req_segments"]
     cred.browseParamsCeid["onlyComplete"] = browseItemDict["isl_only_complete"]
 
     ################## result page ####################

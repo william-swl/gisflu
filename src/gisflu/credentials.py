@@ -39,6 +39,7 @@ class credentials:
                 ]
             },
             **{i: "LineageChanged" for i in ["lineage"]},
+            **{i: "ReqSegChanged" for i in ["requestSegments"]},
         }
         self.hostCode = {"Human": "101", "Animal": "102", "Avian": "103"}
         self.resultHeaderDict = {}
