@@ -39,7 +39,13 @@ def buildBrowseCommand(credentials, ident, value):
     if ident in ["type", "HA", "NA", "host"]:
         assert isinstance(value, list), f"{ident} must be a list"
         value = [str(v) for v in value]
-    elif ident in ["collectDateFrom", "collectDateTo"]:
+    elif ident in [
+        "searchPattern",
+        "collectDateFrom",
+        "collectDateTo",
+        "submitDateFrom",
+        "submitDateTo",
+    ]:
         assert isinstance(value, str), f"{ident} must be a string"
 
     # host code
@@ -121,6 +127,17 @@ def resultToBrowsePage(credentials):
         f"{credentials.url}?sid={credentials.sessionId}&pid={browsePagePid}",
         headers=credentials.headers,
     )
+
+    cmdPipe = [
+        buildCommand(CompId=credentials.browsePage["searchButtonCompId"], cmd="Reset")
+    ]
+    body = buildRequestBody(
+        credentials.sessionId,
+        credentials.windowId,
+        credentials.browsePage["pid"],
+        cmdPipe,
+    )
+    httpPost(credentials.url, data=body, headers=credentials.headers)
 
     return None
 
