@@ -52,6 +52,7 @@ GISAID 获取参数依赖 POST 或 GET 请求。常将函数命令连接为 pipe
 - 在 browse page 传入参数搜索
 - 进入 result page，获取 records 的 json，转为 pandas 格式
 - 返回 browse page。如果没有该步骤，后续构造的请求会返回空值
+- 目前无法便捷地仅获取`isolateIds`（像 EpiCoV 数据库一样）。这是因为流感后端没有在 result page 实现`Selection`方法，无法调出一个对话框展示目前选中的`isolateIds`。流感数据库正在测试 browse page 的`ShowSelectDialog`方法，作用是根据用户输入的 `isolateIds` 列表做选择，但无法从选择获取`isolateIds`列表
 
 ## gisflu.download()
 
