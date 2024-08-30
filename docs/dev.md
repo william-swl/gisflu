@@ -104,3 +104,15 @@ GISAID 获取参数依赖 POST 或 GET 请求。常将函数命令连接为 pipe
 - 允许同时下载`metadata, protein, dna`，并保存到不同文件
 
 - 从 browse page 自动获取 host code
+
+- `.env`获取环境变量，从导包时改为调用`gisflu.login()`时
+
+- `gisflu.search()`区分总数、当前选择的数量
+
+- `gisflu.count()`仅返回数量
+
+- `gisflu.download`允许全部下载
+
+- 发生错误也能返回 browse page
+
+- 开发使用的`where_am_i()`，显示当前 page
