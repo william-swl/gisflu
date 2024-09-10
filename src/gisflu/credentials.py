@@ -69,8 +69,6 @@ class credentials:
             "PB1",
             "HE",
             "PB2",
-            "MP",
-            "NS"
         ]
 
         self.downloadWaitWindowId = None
