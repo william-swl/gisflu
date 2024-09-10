@@ -88,7 +88,7 @@ def login(username: str | None = None, password: str | None = None) -> credentia
     )
 
     res = httpPost(cred.url, data=body, headers=cred.headers)
-    assert re.search("cms_page", res.text), "Username or password wrong!"
+    assert 'Username or password wrong' not in res.text, "Username or password wrong!"
     logger.debug("username and password validated!")
 
     # first page after login
