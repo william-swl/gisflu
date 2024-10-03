@@ -14,7 +14,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.NullHandler())
+logger.addHandler(logging.StreamHandler())
+#.NullHandler()
 
 
 def login(username: str | None = None, password: str | None = None) -> credentials:
