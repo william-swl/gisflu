@@ -4,7 +4,8 @@ import json
 import time
 import stamina
 
-client = httpx.Client(timeout=10)
+timeout = httpx.Timeout(10.0, read=240.0, write=240.0)
+client = httpx.Client(timeout=timeout)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.NullHandler())

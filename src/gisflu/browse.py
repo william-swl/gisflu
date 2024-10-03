@@ -15,7 +15,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.NullHandler())
+logger.addHandler(logging.StreamHandler())
+#.NullHandler()
 
 
 def search(
