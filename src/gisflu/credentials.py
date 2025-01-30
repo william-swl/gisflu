@@ -58,7 +58,7 @@ class credentials:
             "BM2",
             "CM2",
             "M",
-            "MP,
+            "MP",
             "NA",
             "NB",
             "NS1",
